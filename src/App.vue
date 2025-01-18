@@ -6,7 +6,7 @@
   </div>
 </template>
 <script>
-import Loading from './views/comments/loading.vue'
+import Loading from './components/loading.vue'
 export default {
   name: 'App',
   components: {

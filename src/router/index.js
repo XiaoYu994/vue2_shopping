@@ -57,6 +57,17 @@ const authUrl = ['/pay', '/order']
 router.beforeEach((to, from, next) => {
   // 通过vuex 获取用户是否登录
   const token = store.getters.token
+  // 如果访问登录页
+  if (to.path === '/login') {
+    if (token) {
+      // 已登录，直接跳转首页
+      next('/')
+    } else {
+      next()
+    }
+    return
+  }
+
   if (!authUrl.includes(to.path)) {
     next()
     return
@@ -65,7 +76,6 @@ router.beforeEach((to, from, next) => {
     next()
   } else {
     Toast('请先登录')
-    console.log(555)
     next({
       path: '/login',
       query: { backUrl: to.fullPath }
