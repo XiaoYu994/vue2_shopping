@@ -1,27 +1,53 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 
 Vue.use(VueRouter)
 
-const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: HomeView
-  },
-  {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
-]
-
 const router = new VueRouter({
-  routes
+  routes: [
+    {
+      path: '/',
+      component: () => import('@/views/layout/index.vue'),
+      children: [{
+        path: '/user',
+        component: () => import('@/views/layout/user.vue')
+      },
+      {
+        path: '/cart',
+        component: () => import('@/views/layout/cart.vue')
+      },
+      {
+        path: '/category',
+        component: () => import('@/views/layout/category.vue')
+      },
+      {
+        path: '/home',
+        component: () => import('@/views/layout/home.vue')
+      }
+
+      ]
+    },
+    {
+      path: '/login',
+      component: () => import('@/views/login/index.vue')
+    },
+    {
+      path: '/order',
+      component: () => import('@/views/order/index.vue')
+    },
+    {
+      path: '/search',
+      component: () => import('@/views/order/index.vue')
+    },
+    {
+      path: '/detail/ :id',
+      component: () => import('@/views/prodetail/index.vue')
+    },
+    {
+      path: 'pay',
+      component: () => import('@/views/pay/index.vue')
+    }
+  ]
 })
 
 export default router
