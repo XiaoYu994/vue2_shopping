@@ -45,7 +45,7 @@ const router = new VueRouter({
       component: () => import('@/views/prodetail/index.vue')
     },
     {
-      path: 'pay',
+      path: '/pay',
       component: () => import('@/views/pay/index.vue')
     }
   ]

@@ -9,30 +9,94 @@
 
       <div class="form">
         <div class="form-item">
-          <input class="inp" maxlength="11" placeholder="请输入手机号码" type="text">
+          <input class="inp" maxlength="11" placeholder="请输入手机号码" type="text" v-model="tel">
         </div>
         <div class="form-item">
-          <input class="inp" maxlength="5" placeholder="请输入图形验证码" type="text">
-          <img src="@/assets/code.png" alt="">
+          <input class="inp" maxlength="5" placeholder="请输入图形验证码" type="text" v-model="imgCode">
+          <img v-if="base64" :src="base64" alt="">
         </div>
         <div class="form-item">
-          <input class="inp" placeholder="请输入短信验证码" type="text">
-          <button>获取验证码</button>
+          <input class="inp" placeholder="请输入短信验证码" type="text" v-model="code">
+          <button @click="getCode">{{totalSecond === second? '获取验证码': second+'后重新发送'}}</button>
         </div>
       </div>
 
-      <div class="login-btn">登录</div>
+      <div class="login-btn" @click="login">登录</div>
     </div>
   </div>
 </template>
 
 <script>
+import { getImgCode, getCode, login } from '@/api/user'
 export default {
   name: 'LoginPage',
   data () {
     return {
       tel: '',
-      imgCode: ''
+      imgCode: '',
+      code: '',
+      base64: '',
+      key: '',
+      totalSecond: 60,
+      second: 60,
+      timer: null
+    }
+  },
+  created () {
+    this.getImgCode()
+  },
+  destroyed () {
+    // 离开页面销毁定时器
+    clearInterval(this.timer)
+  },
+  computed: {
+    // 判断输入是否正确
+    validate () {
+      if (!/^1[3-9]\d{9}$/.test(this.tel)) {
+        this.$toast('请输入正确的手机号')
+        return false
+      }
+      if (!/^\w{4}$/.test(this.imgCode)) {
+        this.$toast('图片验证码错误')
+        return false
+      }
+      return true
+    }
+  },
+  methods: {
+
+    // 获取图片验证码
+    async getImgCode () {
+      const { data: { base64, key } } = await getImgCode()
+      this.base64 = base64
+      this.key = key
+    },
+    // 获取短信验证码 测试环境下为246810
+    async getCode () {
+      if (!this.validate) return
+      await getCode(this.imgCode, this.key, this.tel)
+      this.$toast('已发送')
+      // 实现倒计时效果
+      if (!this.timer && this.second === this.totalSecond) {
+        this.timer = setInterval(() => {
+          this.second--
+          if (this.second < 1) {
+            clearInterval(this.timer)
+            this.second = this.totalSecond
+            this.timer = null
+          }
+        }, 1000)
+      }
+    },
+    // 登录
+    async login () {
+      if (!this.validate) return
+      if (this.code === '') {
+        this.$toast('请输入短信验证码')
+        return
+      }
+      const res = await login(this.tel, this.code)
+      console.log(res)
     }
   }
 }

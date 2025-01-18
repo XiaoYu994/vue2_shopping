@@ -3,7 +3,7 @@ import axios from 'axios'
 
 // 创建一个新的axios实例
 const request = axios.create({
-  baseURL: 'http://smart-shop.itheima.net/index.php?s=/api',
+  baseURL: 'https://smart-shop.itheima.net/index.php?s=/api',
   timeout: 5000,
   headers: { platform: 'h5' }
 })
@@ -19,7 +19,7 @@ request.interceptors.request.use(function (config) {
 
 // 添加响应拦截器
 request.interceptors.response.use(function (response) {
-  // 对响应数据做点什么
+  // 对响应数据做点什么 这里返回response.data的话相当扒了一层
   return response.data
 }, function (error) {
   // 对响应错误做点什么
