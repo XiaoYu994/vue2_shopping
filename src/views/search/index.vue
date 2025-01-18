@@ -17,7 +17,7 @@
       <div class="list" >
         <div class="list-item"
         v-for="(item,index) in list" :key="index"
-        @click="$router.push('/searchlist')">
+        @click="$router.push(`/searchlist?search=${item}`)">
         {{item}}
       </div>
       </div>
@@ -42,7 +42,6 @@ export default {
         return
       }
       // 进行搜索的时候要将数据添加到数组的最前面 如果已经存在就删除再添加
-      console.log(this.list)
 
       const index = this.list.indexOf(this.key)
       // 不是-1 说明有这个数据
@@ -52,7 +51,7 @@ export default {
       }
       this.list.unshift(this.key)
       setSearch(this.list)
-      this.key = ''
+      this.$router.push(`/searchlist?search=${this.key}`)
     }
   }
 }
