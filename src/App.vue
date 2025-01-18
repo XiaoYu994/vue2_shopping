@@ -2,8 +2,18 @@
   <div id="app">
 
     <router-view/>
+    <Loading></Loading>
   </div>
 </template>
+<script>
+import Loading from './views/comments/loading.vue'
+export default {
+  name: 'App',
+  components: {
+    Loading
+  }
+}
+</script>
 
 <style lang="less">
 #app {
