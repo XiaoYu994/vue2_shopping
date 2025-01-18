@@ -39,7 +39,7 @@ const router = new VueRouter({
     },
     {
       path: '/search',
-      component: () => import('@/views/order/index.vue')
+      component: () => import('@/views/search/index.vue')
     },
     {
       path: '/detail/ :id',
