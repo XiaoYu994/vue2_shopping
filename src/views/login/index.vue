@@ -28,6 +28,7 @@
 
 <script>
 import { getImgCode, getCode, login } from '@/api/user'
+import { setInfo } from '@/utils/localStorage'
 export default {
   name: 'LoginPage',
   data () {
@@ -95,8 +96,12 @@ export default {
         this.$toast('请输入短信验证码')
         return
       }
-      const res = await login(this.tel, this.code)
-      console.log(res)
+      const { data: { token, userId } } = await login(this.tel, this.code)
+      // 存入本地
+      setInfo({ token, userId })
+      this.$toast('登录成功')
+      // 跳转到首页
+      this.$router.push('/')
     }
   }
 }

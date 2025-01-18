@@ -1,5 +1,7 @@
 /* 封装axios用于发送请求 */
 import axios from 'axios'
+import store from '@/store'
+import { Toast } from 'vant'
 
 // 创建一个新的axios实例
 const request = axios.create({
@@ -11,18 +13,29 @@ const request = axios.create({
 // 添加请求拦截器
 request.interceptors.request.use(function (config) {
   // 在发送请求之前做些什么
+  // 改变全局状态
+  store.commit('setLoading', true)
   return config
 }, function (error) {
   // 对请求错误做些什么
+  store.commit('setLoading', false)
   return Promise.reject(error)
 })
 
 // 添加响应拦截器
 request.interceptors.response.use(function (response) {
   // 对响应数据做点什么 这里返回response.data的话相当扒了一层
-  return response.data
+  store.commit('setLoading', false)
+  const res = response.data
+  if (res.status !== 200) {
+    Toast(res.message)
+    return Promise.reject(res.message)
+  }
+  return res
 }, function (error) {
   // 对响应错误做点什么
+  store.commit('setLoading', false)
+  Toast.fail(error.response?.data?.message || '服务器异常')
   return Promise.reject(error)
 })
 
