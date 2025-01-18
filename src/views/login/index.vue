@@ -27,8 +27,7 @@
 </template>
 
 <script>
-import { getImgCode, getCode, login } from '@/api/user'
-import { setInfo } from '@/utils/localStorage'
+import { getImgCode, getCode } from '@/api/user'
 export default {
   name: 'LoginPage',
   data () {
@@ -96,12 +95,21 @@ export default {
         this.$toast('请输入短信验证码')
         return
       }
-      const { data: { token, userId } } = await login(this.tel, this.code)
-      // 存入本地
-      setInfo({ token, userId })
-      this.$toast('登录成功')
+      // TODO使用路由守卫整体到登录页 登录成功后token并不能获取到 本地存储和状态传播可能有延迟
+      // 所以将用户信息存入到本地的时机也交由vuex管理
       // 跳转到首页
-      this.$router.push('/')
+      try {
+        await this.$store.dispatch('user/login', { // 等待登录完成
+          phone: this.tel,
+          smsCode: this.code
+        })
+        this.$toast('登录成功')
+        // 获取回跳地址
+        const backUrl = this.$route.query.backUrl || '/'
+        this.$router.push(backUrl)
+      } catch (error) {
+        this.$toast.fail('登录失败')
+      }
     }
   }
 }

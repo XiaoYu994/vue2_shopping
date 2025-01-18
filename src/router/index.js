@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
+import store from '@/store'
+import { Toast } from 'vant'
 Vue.use(VueRouter)
 
 const router = new VueRouter({
@@ -50,5 +51,25 @@ const router = new VueRouter({
     }
   ]
 })
-
+// 不能访问的页面
+const authUrl = ['/pay', '/order']
+// 路由前置守卫
+router.beforeEach((to, from, next) => {
+  // 通过vuex 获取用户是否登录
+  const token = store.getters.token
+  if (!authUrl.includes(to.path)) {
+    next()
+    return
+  }
+  if (token) {
+    next()
+  } else {
+    Toast('请先登录')
+    console.log(555)
+    next({
+      path: '/login',
+      query: { backUrl: to.fullPath }
+    })
+  }
+})
 export default router

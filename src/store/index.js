@@ -11,8 +11,8 @@ export default new Vuex.Store({
   },
   getters: {
     // 获取user模块下的token
-    token (state) {
-      return state.user.userInfo.token
+    token: state => {
+      return state.user.userInfo?.token || ''
     }
   },
   mutations: {
