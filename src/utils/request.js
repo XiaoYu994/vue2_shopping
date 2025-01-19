@@ -15,6 +15,11 @@ request.interceptors.request.use(function (config) {
   // 在发送请求之前做些什么
   // 改变全局状态
   store.commit('setLoading', true)
+  // 发送请求前检测有没有token 有就携带token到请求头
+  const token = store.getters.token
+  if (token) {
+    config.headers['Access-Token'] = token
+  }
   return config
 }, function (error) {
   // 对请求错误做些什么

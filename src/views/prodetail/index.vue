@@ -143,6 +143,7 @@
 
 <script>
 import { getComments } from '@/api/comments'
+import { addCart } from '@/api/cart'
 import { getGoodsDetail, getGoodsService } from '@/api/goods'
 import CountBox from '@/components/countBox.vue'
 import defaultImg from '@/assets/default-avatar.png'
@@ -216,9 +217,11 @@ export default {
       this.showPannel = true
     },
     // 添加商品到购物车
-    addCart () {
+    async addCart () {
       if (this.loginConfirm()) return
-      console.log('加入购物车')
+      const { message } = await addCart(this.detail.goods_id, this.count, this.detail.skuList[0].goods_sku_id)
+      this.$toast(message)
+      this.showPannel = false
     },
     // 去订单结算页
     goPay () {
