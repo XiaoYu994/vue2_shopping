@@ -18,8 +18,8 @@
             <div
               v-for="(tag, index) in tags"
               :key="index"
-              :class="['tag-item', { active: currentTag === tag.name }]"
-              @click="switchTag(tag.name)"
+              :class="['tag-item', { active: currentTag === tag.score }]"
+              @click="switchTag(tag.score)"
             >
               {{ tag.name }} ({{ tag.count }})
             </div>
@@ -33,6 +33,7 @@
             :key="item.comment_id"
             class="comment-item"
           >
+          <!-- 用户信息 -->
             <div class="user-info">
               <img :src="item.user.avatar_url || defaultAvatar" class="avatar">
               <span class="nickname">{{ item.user.nick_name }}</span>
@@ -45,6 +46,7 @@
                 readonly
               />
             </div>
+            <!-- 评价内容 -->
             <div class="comment-content">{{ item.content }}</div>
             <div class="comment-images" v-if="item.images && item.images.length">
               <img
@@ -54,6 +56,7 @@
                 @click="previewImage(item.images, imgIndex)"
               >
             </div>
+            <!-- 商品规格 -->
             <div class="comment-spec" v-if="item.spec_value">{{ item.spec_value }}</div>
             <div class="comment-time">{{ item.create_time }}</div>
           </div>
@@ -67,33 +70,40 @@
   </template>
 
 <script>
-import { getComments } from '@/api/comments'
+import { getCommentList } from '@/api/comments'
 import defaultAvatar from '@/assets/default-avatar.png'
-
+// 实现图片预览
+import { ImagePreview } from 'vant'
 export default {
   name: 'CommentsPage',
   data () {
     return {
-      goodsId: null,
       defaultAvatar,
       commentList: [],
-      currentTag: '全部',
-      goodRate: 98,
+      currentTag: -1,
       page: 1,
       loading: false,
       finished: false,
       tags: [
-        { name: '全部', count: 0 },
-        { name: '好评', count: 0 },
-        { name: '中评', count: 0 },
-        { name: '差评', count: 0 },
-        { name: '有图', count: 0 }
+        { name: '全部', count: 0, score: -1 },
+        { name: '好评', count: 0, score: 10 },
+        { name: '中评', count: 0, score: 20 },
+        { name: '差评', count: 0, score: 30 }
       ]
     }
   },
   created () {
-    this.goodsId = this.$route.params.id
     this.loadComments()
+  },
+  computed: {
+    goodsId () {
+      return this.$route.query.goodsId
+    },
+    goodRate () {
+      console.log(this.tags[0].count)
+
+      return ((this.tags[1].count / this.tags[0].count) * 100).toFixed(2)
+    }
   },
   methods: {
     async loadComments () {
@@ -101,27 +111,26 @@ export default {
 
       this.loading = true
       try {
-        const { data } = await getComments({
-          goods_id: this.goodsId,
-          page: this.page,
-          type: this.currentTag === '全部' ? '' : this.currentTag
-        })
+        const { data: { list } } = await getCommentList(this.currentTag, this.goodsId, this.page)
 
-        const { list, total, tags } = data
+        console.log(list.data)
+        this.tags[0].count = list.total
+        console.log(this.tags[0].count)
 
         // 更新评价标签数量
-        if (tags) {
-          this.tags = this.tags.map(tag => ({
-            ...tag,
-            count: tags[tag.name.toLowerCase()] || 0
-          }))
-        }
+        list.data.forEach(item => {
+          if (item.score) {
+            if (item.score < 20) this.tags[1].count++
+            if (item.score < 30 && item.score >= 20) this.tags[2].count++
+            if (item.score < 40 && item.score >= 30) this.tags[3].count++
+          }
+        })
 
-        // 追加评价列表
-        this.commentList = [...this.commentList, ...list]
+        // 追加评价列表 加载更多时 将数据增加到原有数据的后面
+        this.commentList = [...this.commentList, ...list.data]
 
         // 判断是否加载完成
-        if (this.commentList.length >= total) {
+        if (this.commentList.length >= list.total) {
           this.finished = true
         } else {
           this.page++
@@ -141,9 +150,12 @@ export default {
       this.finished = false
       this.loadComments()
     },
+    // 实现图片预览功能
     previewImage (images, index) {
+      console.log(images)
+
       const urls = images.map(img => img.image_url)
-      this.$imagePreview({
+      ImagePreview({
         images: urls,
         startPosition: index
       })
@@ -243,6 +255,7 @@ export default {
       }
 
       .comment-content {
+        text-align: left;
         font-size: 14px;
         color: #333;
         line-height: 1.5;
@@ -264,12 +277,14 @@ export default {
       }
 
       .comment-spec {
+        text-align: left;
         font-size: 12px;
         color: #999;
         margin-bottom: 5px;
       }
 
       .comment-time {
+        text-align: left;
         font-size: 12px;
         color: #999;
       }

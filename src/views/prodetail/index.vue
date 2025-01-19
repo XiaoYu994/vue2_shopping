@@ -64,7 +64,7 @@
       <div class="comment-title">
         <div class="left">商品评价 ({{ this.TotalComments }}条)</div>
         <!-- // TODO 跳转评论页 -->
-        <div class="right">查看更多 <van-icon name="arrow" /></div>
+        <div class="right" @click="$router.push(`/comments?goodsId=${goodsId}`)">查看更多 <van-icon name="arrow" /></div>
       </div>
       <div class="comment-list">
         <div
@@ -152,7 +152,6 @@ export default {
       } = await getGoodsDetail(this.goodsId)
       this.detail = detail
       this.images = detail.goods_images
-      console.log(this.detail)
     },
     async getComments () {
       const {
@@ -166,8 +165,6 @@ export default {
         data: { list }
       } = await getGoodsService(this.goodsId)
       this.serviceList = list
-      console.log(list)
-      console.log(this.serviceList)
     }
   }
 }

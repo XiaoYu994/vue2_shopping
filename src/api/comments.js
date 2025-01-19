@@ -9,3 +9,14 @@ export const getComments = (goodsId, limit) => {
     }
   })
 }
+
+// 获取商品评价列表
+export const getCommentList = (scoreType, goodsId, page) => {
+  return request.get('/comment/list', {
+    params: {
+      scoreType,
+      goodsId,
+      page
+    }
+  })
+}
