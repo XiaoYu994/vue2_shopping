@@ -46,8 +46,12 @@ const router = new VueRouter({
       component: () => import('@/views/search/searchList.vue')
     },
     {
-      path: '/detail/ :id',
+      path: '/detail/:id',
       component: () => import('@/views/prodetail/index.vue')
+    },
+    {
+      path: '/comments',
+      component: () => import('@/views/comments/index.vue')
     },
     {
       path: '/pay',
