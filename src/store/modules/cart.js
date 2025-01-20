@@ -18,12 +18,28 @@ export default {
     chageCount (state, { goodsId, goodsNum }) {
       const goods = state.list.find(item => item.goods_id === goodsId)
       goods.goods_num = goodsNum
+    },
+    // 改变商品选中状态
+    changeChecked (state, goodsId) {
+      const goods = state.list.find(item => item.goods_id === goodsId)
+
+      goods.isChecked = !goods.isChecked
+    },
+    // 全选反选
+    changeAllChecked (state, flag) {
+      state.list.forEach(item => {
+        item.isChecked = flag
+      })
     }
   },
   actions: {
     // 获取购物车列表数据
     async getdata (context) {
       const res = await getCartList()
+      // 给购物车每个商品都添加 isChecked 属性，区分是否被选中
+      res.data.list.forEach(item => {
+        item.isChecked = true
+      })
       context.commit('setdata', res.data)
     },
     // 更新购物车数据
@@ -50,5 +66,9 @@ export default {
       }, 1000)
     }
   },
-  getters: {}
+  getters: {
+    isAllchecked (state) {
+      return state.list.every(item => item.isChecked)
+    }
+  }
 }

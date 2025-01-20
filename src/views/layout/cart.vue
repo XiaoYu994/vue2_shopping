@@ -18,7 +18,7 @@
     <!-- 购物车列表 -->
     <div class="cart-list">
       <div class="cart-item" v-for="item in list" :key="item.id" >
-        <van-checkbox></van-checkbox>
+        <van-checkbox :value="item.isChecked" @click="changeChecked(item.goods_id)"></van-checkbox>
         <div class="show" @click="$router.push(`/detail/${item.goods_id}`)">
           <img :src="item.goods.goods_image" alt="">
         </div>
@@ -34,7 +34,7 @@
 
     <div class="footer-fixed">
       <div  class="all-check">
-        <van-checkbox  icon-size="18"></van-checkbox>
+        <van-checkbox  icon-size="18" :value="isAllchecked" @click="changeAllChecked"></van-checkbox>
         全选
       </div>
 
@@ -51,13 +51,12 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import CountBox from '@/components/countBox.vue'
 export default {
   name: 'CartPage',
   data () {
     return {
-      timer: null
     }
   },
   components: {
@@ -73,7 +72,8 @@ export default {
     isLogin () {
       return this.$store.getters.token
     },
-    ...mapState('cart', ['list', 'cartTotal'])
+    ...mapState('cart', ['list', 'cartTotal']),
+    ...mapGetters('cart', ['isAllchecked'])
   },
   methods: {
     async handelChange (goodsId, goodsNum, goodsSkuId) {
@@ -82,6 +82,15 @@ export default {
         goodsNum,
         goodsSkuId
       })
+    },
+    // 改变单个商品状态
+    changeChecked (goodsId) {
+      this.$store.commit('cart/changeChecked', goodsId)
+    },
+    // 全选 反选
+    changeAllChecked () {
+      // this.isAllchecked = !this.isAllchecked
+      this.$store.commit('cart/changeAllChecked', !this.isAllchecked)
     }
   }
 
