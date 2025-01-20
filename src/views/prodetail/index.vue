@@ -103,7 +103,7 @@
         <span>首页</span>
       </div>
       <div class="icon-cart" @click="$router.push('/cart')">
-        <van-icon name="shopping-cart-o" />
+        <van-icon name="shopping-cart-o" :badge="cartTotal > 0 ? cartTotal : ''" />
         <span>购物车</span>
       </div>
       <div class="btn-add" @click="add">加入购物车</div>
@@ -143,7 +143,7 @@
 
 <script>
 import { getComments } from '@/api/comments'
-import { addCart } from '@/api/cart'
+import { addCart, getCartTotal } from '@/api/cart'
 import { getGoodsDetail, getGoodsService } from '@/api/goods'
 import CountBox from '@/components/countBox.vue'
 import defaultImg from '@/assets/default-avatar.png'
@@ -164,7 +164,8 @@ export default {
       serviceList: [],
       mode: 'cart',
       showPannel: false,
-      count: 1
+      count: 1,
+      cartTotal: 0
     }
   },
   components: {
@@ -180,6 +181,7 @@ export default {
     }
   },
   created () {
+    if (this.token) this.getCartTotal()
     this.getGoodsDetail()
     this.getComments()
     this.getGoodsService()
@@ -187,6 +189,10 @@ export default {
   methods: {
     onChange (index) {
       this.current = index
+    },
+    async getCartTotal () {
+      const { data: { cartTotal } } = await getCartTotal()
+      this.cartTotal = cartTotal
     },
     async getGoodsDetail () {
       const {
@@ -219,8 +225,9 @@ export default {
     // 添加商品到购物车
     async addCart () {
       if (this.loginConfirm()) return
-      const { message } = await addCart(this.detail.goods_id, this.count, this.detail.skuList[0].goods_sku_id)
+      const { message, data: { cartTotal } } = await addCart(this.detail.goods_id, this.count, this.detail.skuList[0].goods_sku_id)
       this.$toast(message)
+      this.cartTotal = cartTotal
       this.showPannel = false
     },
     // 去订单结算页
@@ -471,6 +478,7 @@ export default {
       .van-icon {
         font-size: 24px;
       }
+
     }
     .btn-add,
     .btn-buy {
