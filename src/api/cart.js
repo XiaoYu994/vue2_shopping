@@ -26,3 +26,10 @@ export const updateCart = (goodsId, goodsNum, goodsSkuId) => {
     goodsSkuId
   })
 }
+
+// 删除选中商品
+export const deleteCart = (cartIds) => {
+  return request.post('/cart/clear', {
+    cartIds
+  })
+}

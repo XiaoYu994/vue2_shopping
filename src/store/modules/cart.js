@@ -1,74 +1,111 @@
-import { getCartList, updateCart } from '@/api/cart'
+import { getCartList, updateCart, deleteCart } from '@/api/cart'
 let timer = null
+
 export default {
   namespaced: true,
+
   state () {
     return {
       list: [],
       cartTotal: 0
     }
   },
+
   mutations: {
-    // 将获取到的数据设置到vuex中
-    setdata (state, { list, cartTotal }) {
+    setData (state, { list, cartTotal }) {
       state.list = list
       state.cartTotal = cartTotal
     },
-    // 更新购物车中的商品数量
-    chageCount (state, { goodsId, goodsNum }) {
+
+    changeCount (state, { goodsId, goodsNum }) {
       const goods = state.list.find(item => item.goods_id === goodsId)
-      goods.goods_num = goodsNum
+      if (goods) { // 添加空值检查
+        goods.goods_num = goodsNum
+      }
     },
-    // 改变商品选中状态
+
     changeChecked (state, goodsId) {
       const goods = state.list.find(item => item.goods_id === goodsId)
-
-      goods.isChecked = !goods.isChecked
+      if (goods) { // 添加空值检查
+        goods.isChecked = !goods.isChecked
+      }
     },
-    // 全选反选
+
     changeAllChecked (state, flag) {
       state.list.forEach(item => {
         item.isChecked = flag
       })
     }
   },
+
   actions: {
-    // 获取购物车列表数据
-    async getdata (context) {
-      const res = await getCartList()
-      // 给购物车每个商品都添加 isChecked 属性，区分是否被选中
-      res.data.list.forEach(item => {
-        item.isChecked = true
-      })
-      context.commit('setdata', res.data)
+    async getData (context) {
+      try { // 添加错误处理
+        const res = await getCartList()
+        res.data.list.forEach(item => {
+          item.isChecked = true
+        })
+        context.commit('setData', res.data)
+      } catch (error) {
+        console.error('获取购物车数据失败：', error)
+        throw error
+      }
     },
-    // 更新购物车数据
+
     async update (context, obj) {
       const { goodsId, goodsNum, goodsSkuId } = obj
-      context.commit('chageCount', {
+
+      // 参数验证
+      if (!goodsId || goodsNum < 1) {
+        throw new Error('参数错误')
+      }
+
+      context.commit('changeCount', {
         goodsId,
         goodsNum
       })
-      // 清除之前的定时器
+
       clearTimeout(timer)
-      // 设置新的定时器
       timer = setTimeout(async () => {
         try {
           await updateCart(goodsId, goodsNum, goodsSkuId)
         } catch (error) {
-          // 更新失败，回滚数据
-          context.commit('updateCartCount', {
+          context.commit('changeCount', {
             goodsId,
             goodsNum: goodsNum - 1
           })
           throw error
         }
       }, 1000)
+    },
+
+    async del (context) {
+      const selCartList = context.getters.selCartList
+      const cartIds = selCartList.map(item => item.id)
+      await deleteCart(cartIds)
+      // 重新拉取最新的购物车数据 (重新渲染)
+      context.dispatch('getData')
     }
   },
+
   getters: {
-    isAllchecked (state) {
-      return state.list.every(item => item.isChecked)
+    isAllChecked (state) {
+      return state.list.length > 0 && state.list.every(item => item.isChecked)
+    },
+
+    selCartList (state) {
+      return state.list.filter(item => item.isChecked)
+    },
+
+    selCount (state, getters) {
+      return getters.selCartList
+        .reduce((sum, item) => sum + item.goods_num, 0)
+    },
+
+    selPrice (state, getters) {
+      return getters.selCartList
+        .reduce((sum, item) => sum + item.goods_num * item.goods.goods_price_min, 0)
+        .toFixed(2)
     }
   }
 }
