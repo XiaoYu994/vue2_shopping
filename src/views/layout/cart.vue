@@ -125,7 +125,7 @@ export default {
       return this.$store.getters.token
     },
     ...mapState('cart', ['list', 'cartTotal']),
-    ...mapGetters('cart', ['isAllChecked', 'selCount', 'selPrice'])
+    ...mapGetters('cart', ['isAllChecked', 'selCount', 'selPrice', 'selCartList'])
   },
   methods: {
     async handelChange (goodsId, goodsNum, goodsSkuId) {
