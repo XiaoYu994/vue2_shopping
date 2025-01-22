@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@vant/area-data": "^2.0.0",
     "axios": "^1.7.9",
     "core-js": "^3.8.3",
     "vant": "^2.13.6",

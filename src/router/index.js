@@ -56,7 +56,12 @@ const router = new VueRouter({
     {
       path: '/pay',
       component: () => import('@/views/pay/index.vue')
+    },
+    {
+      path: '/address',
+      component: () => import('@/views/address/index.vue')
     }
+
   ]
 })
 // 不能访问的页面

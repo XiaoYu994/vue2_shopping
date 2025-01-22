@@ -34,7 +34,7 @@ export const addAddress = (data) => {
 // 删除地址
 export const deleteAddress = (addressId) => {
   return request.post('/address/delete', {
-    address_id: addressId
+    addressId
   })
 }
 // 查询所有省市

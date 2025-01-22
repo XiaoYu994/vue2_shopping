@@ -230,10 +230,20 @@ export default {
       this.cartTotal = cartTotal
       this.showPannel = false
     },
-    // 去订单结算页
+    // 跳转到订单结算页面
     goPay () {
+      // 判断用户是否有登录
       if (this.loginConfirm()) return
-      console.log('去结算')
+
+      this.$router.push({
+        path: '/pay',
+        query: {
+          mode: 'buyNow',
+          goodsId: this.goodsId,
+          goodsSkuId: this.detail.skuList[0].goods_sku_id,
+          goodsNum: this.count
+        }
+      })
     }
   }
 }

@@ -9,10 +9,10 @@
         <van-icon name="logistics" />
       </div>
 
-      <div class="info" v-if="selectAddRess?.address_id">
+      <div class="info" v-if="defaultl?.address_id">
         <div class="info-content">
-          <span class="name">{{ selectAddRess.name }}</span>
-          <span class="mobile">{{ selectAddRess.phone }}</span>
+          <span class="name">{{ defaultl.name+' ' }}</span>
+          <span class="mobile">{{ defaultl.phone }}</span>
         </div>
         <div class="info-address">
           {{ longAddress }}
@@ -95,7 +95,7 @@
 </template>
 
 <script>
-import { getAddRessList } from '@/api/address'
+import { getAddRessList, getDefault } from '@/api/address'
 import { checkOrder, orderPay } from '@/api/order'
 
 export default {
@@ -105,6 +105,7 @@ export default {
       addressList: [],
       order: {},
       personal: {},
+      defaultl: {},
       remark: '' // 留言
 
     }
@@ -112,15 +113,12 @@ export default {
   created () {
     this.getAddRessList()
     this.getOrderList()
+    this.getDefault()
   },
   computed: {
-    selectAddRess () {
-      // 默认第一条就是默认地址
-      return this.addressList[0] || {}
-    },
     longAddress () {
-      const region = this.selectAddRess.region
-      return region.province + region.city + region.region + this.selectAddRess.detail
+      const region = this.defaultl.region
+      return region.province + region.city + region.region + this.defaultl.detail
     },
     // 计算属性接受地址栏上的参数
     mode () {
@@ -142,10 +140,18 @@ export default {
   },
 
   methods: {
-    // 获取默认地址
+    // 获取地址列表
     async getAddRessList () {
       const { data: { list } } = await getAddRessList()
       this.addressList = list
+    },
+    // 获取默认收获地址
+    async getDefault () {
+      const { data: { defaultId } } = await getDefault()
+      console.log(this.addressList)
+
+      this.defaultl = this.addressList.find(item => item.address_id === defaultId)
+      console.log(this.defaultl)
     },
     // 订单结算
     async getOrderList () {
