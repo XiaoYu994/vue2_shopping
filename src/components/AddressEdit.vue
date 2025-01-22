@@ -28,7 +28,7 @@
 
 <script>
 import { areaList } from '@vant/area-data'
-
+import { getRegionTree } from '@/api/address'
 export default {
   name: 'AddressEdit',
   props: {
@@ -42,6 +42,11 @@ export default {
   data () {
     return {
       areaList,
+      areaList2: {
+        province_list: {},
+        city_list: {},
+        county_list: {}
+      },
       selectedArea: {
         province: '',
         city: '',
@@ -68,19 +73,58 @@ export default {
       }
     }
   },
-
+  async created () {
+    await this.getAreaList()
+  },
   methods: {
+  // 获取地区数据并转换
+    async getAreaList () {
+      try {
+        const { data: { list } } = await getRegionTree()
+
+        // 处理省份数据
+        Object.values(list).forEach(province => {
+        // 直接使用 ID
+          this.areaList2.province_list[province.id] = province.name
+
+          // 处理城市数据
+          if (province.city) {
+            Object.values(province.city).forEach(city => {
+            // 直接使用 ID
+              this.areaList2.city_list[city.id] = city.name
+
+              // 处理区域数据
+              if (city.region) {
+                Object.values(city.region).forEach(region => {
+                // 直接使用 ID
+                  this.areaList2.county_list[region.id] = region.name
+                })
+              }
+            })
+          }
+        })
+
+        console.log('转换后的地区数据：', this.areaList2)
+      } catch (error) {
+        console.error('获取地区数据失败：', error)
+        this.$toast.fail('获取地区数据失败')
+      }
+    },
     onChangeArea (values, index) {
       console.log('选择的地区值：', values)
+      console.log(this.areaList2)
 
       if (values && values.length === 3) {
         const province = values[0].name
         const city = values[1].name
         const region = values[2].name
-        // 从 areaCode 获取各级编码
-        const provinceCode = values[0].code
-        const cityCode = values[1].code
-        const regionCode = values[2].code
+        // 查找对应的编码
+        const provinceCode = Object.entries(this.areaList2.province_list)
+          .find(([_, name]) => name === province)?.[0]
+        const cityCode = Object.entries(this.areaList2.city_list)
+          .find(([_, name]) => name === city)?.[0]
+        const regionCode = Object.entries(this.areaList2.county_list)
+          .find(([_, name]) => name === region)?.[0]
 
         console.log('解析的编码：', {
           provinceCode,

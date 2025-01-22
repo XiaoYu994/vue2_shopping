@@ -38,6 +38,6 @@ export const deleteAddress = (addressId) => {
   })
 }
 // 查询所有省市
-export const getRegion = () => {
+export const getRegionTree = () => {
   return request.get('/region/tree')
 }
