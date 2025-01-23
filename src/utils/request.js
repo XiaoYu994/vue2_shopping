@@ -34,6 +34,7 @@ request.interceptors.response.use(function (response) {
   const res = response.data
   if (res.status !== 200) {
     console.log('状态码错误')
+    console.log(res)
     Toast(res.message)
     return Promise.reject(res.message)
   }

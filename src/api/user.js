@@ -25,3 +25,20 @@ export const login = (mobile, smsCode) => {
     }
   })
 }
+
+// 获取个人信息
+export const getUserInfoDetail = () => {
+  return request.get('/user/info')
+}
+
+// 上传头像
+export const uploadAvatar = (file) => {
+  console.log(file)
+
+  return request.post('/upload/image', {
+    file,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
